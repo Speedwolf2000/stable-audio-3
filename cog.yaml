@@ -8,5 +8,6 @@ build:
     - "numpy==1.26.4"
     - "torch==2.1.2"
     - "torchaudio==2.1.2"
-    # Add other Stable Audio 3 dependencies here
+  run:
+    - "pip install --no-build-isolation -e . 'numpy==1.26.4'"
 predict: "predict.py:Predictor"
