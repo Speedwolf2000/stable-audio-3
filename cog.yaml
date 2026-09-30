@@ -1,0 +1,11 @@
+build:
+  gpu: true
+  cuda: "12.1"
+  python_version: "3.10"
+  system_packages:
+    - "ffmpeg"
+  python_packages:
+    - "torch==2.1.2"
+    - "torchaudio==2.1.2"
+    # Add other Stable Audio 3 dependencies here
+predict: "predict.py:Predictor"
