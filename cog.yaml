@@ -8,6 +8,10 @@ build:
     - "numpy==1.26.4"
     - "torch==2.1.2"
     - "torchaudio==2.1.2"
-  run:
-    - "pip install --no-build-isolation -e . 'numpy==1.26.4'"
+    - "einops"
+    - "safetensors"
+    - "soundfile"
+    - "scipy"
+    - "transformers"
+    - "huggingface-hub"
 predict: "predict.py:Predictor"
