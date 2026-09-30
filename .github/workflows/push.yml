@@ -33,5 +33,5 @@ jobs:
         run: |
           MODEL_NAME=$(echo "${{ inputs.model_name }}" | tr -d ' ')
           echo -n "$HF_TOKEN" > hf_token.txt
-          cog push --separate-weights --secret id=hf_token,src=hf_token.txt "r8.im/$MODEL_NAME"
+          cog push --secret id=hf_token,src=hf_token.txt "r8.im/$MODEL_NAME"
           rm -f hf_token.txt
