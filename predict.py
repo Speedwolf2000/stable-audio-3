@@ -1,6 +1,10 @@
 import os
-from cog import BasePredictor, Input, Path, Secret
-from huggingface_hub import login
+
+# Force huggingface_hub to read directly from the baked-in container cache
+# without making unauthenticated HEAD requests to the gated repo at runtime
+os.environ["HF_HUB_OFFLINE"] = "1"
+
+from cog import BasePredictor, Input, Path
 from stable_audio_3 import StableAudioModel
 import torch
 import torchaudio
@@ -8,28 +12,15 @@ import torchaudio
 
 class Predictor(BasePredictor):
     def setup(self):
-        """Initialize predictor state; gated model loads on first prediction."""
-        self.model = None
+        """Load the baked-in model weights into GPU memory on container boot."""
+        self.model = StableAudioModel.from_pretrained("medium")
 
     def predict(
         self,
         prompt: str = Input(description="Text prompt for audio generation"),
-        duration: int = Input(description="Duration in seconds", default=30),
-        hf_token: Secret = Input(
-            description="Hugging Face access token (hf_...) with access to stabilityai/stable-audio-3-medium",
-            default=None,
-        ),
+        duration: int = Input(description="Duration in seconds", default=30, ge=1, le=180),
     ) -> Path:
-        """Run a single prediction on the model"""
-        if self.model is None:
-            token = hf_token.get_secret_value() if hf_token else os.environ.get("HF_TOKEN")
-            if not token:
-                raise ValueError(
-                    "Please provide your Hugging Face token (hf_...) in the hf_token input field."
-                )
-            login(token=token)
-            self.model = StableAudioModel.from_pretrained("medium")
-
+        """Run a single prediction on the loaded model."""
         audio = self.model.generate(prompt=prompt, duration=duration)
 
         # Handle tuple return (sample_rate, tensor) or raw tensor
