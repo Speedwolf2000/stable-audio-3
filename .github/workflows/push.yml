@@ -3,20 +3,35 @@ on:
   workflow_dispatch:
     inputs:
       model_name:
-        description: 'Enter the model name, like "your-username/stable-audio-3-medium"'
+        description: 'Enter the model name, like "speedwolf2000/base_forgev2"'
         required: true
+        default: 'speedwolf2000/base_forgev2'
 
 jobs:
   push_to_replicate:
     runs-on: ubuntu-latest
     steps:
+      - name: Free up runner disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          df -h
+
       - name: Checkout Code
-        uses: actions/checkout@v3
-        
+        uses: actions/checkout@v4
+
       - name: Setup Cog
         uses: replicate/setup-cog@v2
         with:
           token: ${{ secrets.REPLICATE_API_TOKEN }}
-          
+
       - name: Push to Replicate
-        run: cog push r8.im/${{ inputs.model_name }}
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          MODEL_NAME=$(echo "${{ inputs.model_name }}" | tr -d ' ')
+          echo -n "$HF_TOKEN" > hf_token.txt
+          cog push --separate-weights --secret id=hf_token,src=hf_token.txt "r8.im/$MODEL_NAME"
+          rm -f hf_token.txt
